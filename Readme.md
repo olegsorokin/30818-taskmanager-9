@@ -1,7 +1,7 @@
 # Личный проект «Менеджер задач» [![Build status][travis-image]][travis-url]
 
 * Студент: [Олег Сорокин](https://up.htmlacademy.ru/ecmascript/9/user/30818).
-* Наставник: `Неизвестно`.
+* Наставник: [Павел Скрипкин](https://htmlacademy.ru/profile/id604273).
 
 ---
 
