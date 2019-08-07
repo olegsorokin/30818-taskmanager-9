@@ -189,25 +189,26 @@ const boardLoadMoreButtonTemplate = `<button class="load-more" type="button">loa
 const mainContainer = document.getElementsByClassName(`main`)[0];
 const mainControl = document.getElementsByClassName(`control`)[0];
 
-const createBoard = () => {
-  const board = document.createElement(`section`);
-  board.className = `board container`;
-
-  const tasksList = document.createElement(`div`);
-  tasksList.className = `board__tasks`;
-
-  const CARDS = 3;
-  for (let index = 0; index < CARDS; index++) {
-    tasksList.insertAdjacentHTML(`beforeEnd`, boardTaskCardTemplate);
-  }
-
-  board.insertAdjacentHTML(`beforeEnd`, boardFiltersTemplate);
-  board.insertAdjacentElement(`beforeEnd`, tasksList);
-  board.insertAdjacentHTML(`beforeEnd`, boardLoadMoreButtonTemplate);
-  mainContainer.insertAdjacentElement(`beforeEnd`, board);
+function renderComponent(element, position, html) {
+  element.insertAdjacentHTML(position, html);
 }
 
+const toDoBoard = `
+  ${searchTemplate}
+  ${filtersTemplate}
+
+  <section class="board container">
+    ${boardFiltersTemplate}
+
+    <div class="board__tasks">
+      ${boardTaskCardTemplate}
+      ${boardTaskCardTemplate}
+      ${boardTaskCardTemplate}
+    </div>
+
+    ${boardLoadMoreButtonTemplate}
+  </section>
+`;
+
 mainControl.insertAdjacentHTML(`beforeEnd`, menuTemplate);
-mainContainer.insertAdjacentHTML(`beforeEnd`, searchTemplate);
-mainContainer.insertAdjacentHTML(`beforeEnd`, filtersTemplate);
-createBoard();
+mainContainer.insertAdjacentHTML(`beforeEnd`, toDoBoard);
