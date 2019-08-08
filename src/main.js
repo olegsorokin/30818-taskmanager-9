@@ -208,5 +208,5 @@ const toDoBoard = `
   </section>
 `;
 
-mainControl.insertAdjacentHTML(`beforeEnd`, menuTemplate);
-mainContainer.insertAdjacentHTML(`beforeEnd`, toDoBoard);
+mainControl.insertAdjacentHTML(`beforeend`, menuTemplate);
+mainContainer.insertAdjacentHTML(`beforeend`, toDoBoard);
