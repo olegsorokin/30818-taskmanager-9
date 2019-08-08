@@ -1,3 +1,5 @@
+'use strict';
+
 const menuTemplate = `
   <section class="control__btn-wrap">
     <input
@@ -188,10 +190,6 @@ const boardLoadMoreButtonTemplate = `<button class="load-more" type="button">loa
 
 const mainContainer = document.getElementsByClassName(`main`)[0];
 const mainControl = document.getElementsByClassName(`control`)[0];
-
-function renderComponent(element, position, html) {
-  element.insertAdjacentHTML(position, html);
-}
 
 const toDoBoard = `
   ${searchTemplate}
