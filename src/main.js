@@ -10,7 +10,7 @@ import {makeTask} from './components/task.js';
 import {makeTaskEdit} from './components/task-edit.js';
 import {createLoadMoreButtonTemplate} from './components/load-more-button.js';
 
-const TASK_COUNT = 8;
+const TASK_COUNT = 17;
 const TASK_PER_LOAD = 8;
 
 const siteMainElement = document.querySelector(`.main`);
@@ -28,37 +28,37 @@ const tasksContainer = document.querySelector(`.board__tasks`);
 const filtersContainer = document.querySelector(`.filter`);
 const taskList = new Array(TASK_COUNT).fill(``).map(getTask);
 
-const renderFilters = (container, tasks) => {
-  container.insertAdjacentHTML(`beforeend`, getFilters(tasks).map(makeFilter).join(``));
-};
 const renderTasks = (container, task, tasks) => {
   container.insertAdjacentHTML(`beforeend`, tasks.map(task).join(``));
 };
 
 render(boardElement, createSortingTemplate(), `afterbegin`);
 
-if (TASK_COUNT > TASK_PER_LOAD) {
-  render(boardElement, createLoadMoreButtonTemplate(), `beforeend`);
-}
-
-const buttonLoadMore = siteMainElement.querySelector(`.load-more`);
 let loadCounter = 0;
 let taskPackLength = (value) => value * TASK_PER_LOAD + TASK_PER_LOAD;
 
-renderFilters(filtersContainer, taskList);
-renderTasks(tasksContainer, makeTaskEdit, [taskList[0]]);
-renderTasks(tasksContainer, makeTask, taskList.slice(1, taskPackLength(loadCounter) < taskList.length ? taskPackLength(loadCounter) : taskList.length));
+render(filtersContainer, getFilters(taskList).map(makeFilter).join(``), `beforeend`);
+render(tasksContainer, [taskList[0]].map(makeTaskEdit).join(``), `beforeend`);
 
-buttonLoadMore.addEventListener(`click`, () => {
-  loadCounter = loadCounter + 1;
+if (TASK_COUNT <= TASK_PER_LOAD) {
+  render(tasksContainer, taskList.slice(1, taskList.length).map(makeTask).join(``), `beforeend`);
+} else {
+  render(tasksContainer, taskList.slice(1, taskPackLength(loadCounter)).map(makeTask).join(``), `beforeend`);
+  render(boardElement, createLoadMoreButtonTemplate(), `beforeend`);
 
-  const firstElementIndex = loadCounter * TASK_PER_LOAD;
-  let lastElementIndex = taskPackLength(loadCounter);
+  const buttonLoadMore = siteMainElement.querySelector(`.load-more`);
 
-  if (taskPackLength(loadCounter) >= TASK_COUNT) {
-    lastElementIndex = loadCounter * TASK_PER_LOAD + TASK_COUNT % TASK_PER_LOAD;
-    buttonLoadMore.parentNode.removeChild(buttonLoadMore);
-  }
+  buttonLoadMore.addEventListener(`click`, () => {
+    loadCounter = loadCounter + 1;
 
-  renderTasks(tasksContainer, makeTask, taskList.slice(firstElementIndex, lastElementIndex));
-});
+    const firstElementIndex = loadCounter * TASK_PER_LOAD;
+    let lastElementIndex = taskPackLength(loadCounter);
+
+    if (taskPackLength(loadCounter) >= TASK_COUNT) {
+      lastElementIndex = loadCounter * TASK_PER_LOAD + TASK_COUNT % TASK_PER_LOAD;
+      buttonLoadMore.parentNode.removeChild(buttonLoadMore);
+    }
+
+    renderTasks(tasksContainer, makeTask, taskList.slice(firstElementIndex, lastElementIndex));
+  });
+}
