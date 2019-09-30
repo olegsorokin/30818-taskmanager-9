@@ -1,64 +1,73 @@
+import {getTask} from './data/task.js';
+import {getFilters} from './data/filters.js';
+
 import {createSiteMenuTemplate} from './components/site-menu.js';
 import {createSearchTemplate} from './components/search.js';
-import {createSortingTemplate} from './components/sorting.js';
 import {createFiltersContainer} from './components/filters-container.js';
-import {getFilters} from './data/filters.js';
 import {makeFilter} from './components/filter.js';
+import {createSortingTemplate} from './components/sorting.js';
 import {createBoardTemplate} from './components/board.js';
-import {getTask} from './data/task.js';
-import {makeTask} from './components/task.js';
 import {makeTaskEdit} from './components/task-edit.js';
+import {makeTask} from './components/task.js';
 import {createLoadMoreButtonTemplate} from './components/load-more-button.js';
 
 const TASK_COUNT = 17;
-const TASK_PER_LOAD = 8;
+const TASKS_PER_PAGE = 8;
+let page = 0;
 
-const siteMainElement = document.querySelector(`.main`);
-const siteHeaderElement = siteMainElement.querySelector(`.main__control`);
+const tasks = new Array(TASK_COUNT).fill(``).map(getTask);
+const editTask = tasks[0];
+
+const mainLayout = document.querySelector(`.main`);
+const headerLayout = mainLayout.querySelector(`.main__control`);
 
 const render = (container, template, place) => container.insertAdjacentHTML(place, template);
-
-render(siteHeaderElement, createSiteMenuTemplate(), `beforeend`);
-render(siteMainElement, createSearchTemplate(), `beforeend`);
-render(siteMainElement, createFiltersContainer(), `beforeend`);
-render(siteMainElement, createBoardTemplate(), `beforeend`);
-
-const boardElement = siteMainElement.querySelector(`.board`);
-const tasksContainer = document.querySelector(`.board__tasks`);
-const filtersContainer = document.querySelector(`.filter`);
-const taskList = new Array(TASK_COUNT).fill(``).map(getTask);
-
-const renderTasks = (container, task, tasks) => {
-  container.insertAdjacentHTML(`beforeend`, tasks.map(task).join(``));
+const renderLayouts = () => {
+  render(headerLayout, createSiteMenuTemplate(), `beforeend`);
+  render(mainLayout, createSearchTemplate(), `beforeend`);
+  render(mainLayout, createFiltersContainer(), `beforeend`);
+  render(mainLayout, createBoardTemplate(), `beforeend`);
 };
 
-render(boardElement, createSortingTemplate(), `afterbegin`);
+const initPage = () => {
+  renderLayouts();
 
-let loadCounter = 0;
-let taskPackLength = (value) => value * TASK_PER_LOAD + TASK_PER_LOAD;
+  const filtersContainer = mainLayout.querySelector(`.filter`);
+  const boardElement = mainLayout.querySelector(`.board`);
+  const tasksContainer = mainLayout.querySelector(`.board__tasks`);
 
-render(filtersContainer, getFilters(taskList).map(makeFilter).join(``), `beforeend`);
-render(tasksContainer, [taskList[0]].map(makeTaskEdit).join(``), `beforeend`);
+  const renderTasks = (firstElementIndex) => {
+    const getLastTaskIndex = page * TASKS_PER_PAGE + TASKS_PER_PAGE;
 
-if (TASK_COUNT <= TASK_PER_LOAD) {
-  render(tasksContainer, taskList.slice(1, taskList.length).map(makeTask).join(``), `beforeend`);
-} else {
-  render(tasksContainer, taskList.slice(1, taskPackLength(loadCounter)).map(makeTask).join(``), `beforeend`);
-  render(boardElement, createLoadMoreButtonTemplate(), `beforeend`);
+    render(tasksContainer, tasks
+        .slice(firstElementIndex, getLastTaskIndex)
+        .map(makeTask)
+        .join(``),
+    `beforeend`);
+  };
 
-  const buttonLoadMore = siteMainElement.querySelector(`.load-more`);
+  render(filtersContainer, getFilters(tasks).map(makeFilter).join(``), `beforeend`);
+  render(boardElement, createSortingTemplate(), `afterbegin`);
+  render(tasksContainer, makeTaskEdit(editTask), `beforeend`);
+  renderTasks(1);
 
-  buttonLoadMore.addEventListener(`click`, () => {
-    loadCounter = loadCounter + 1;
+  if (TASK_COUNT > TASKS_PER_PAGE) {
+    render(boardElement, createLoadMoreButtonTemplate(), `beforeend`);
 
-    const firstElementIndex = loadCounter * TASK_PER_LOAD;
-    let lastElementIndex = taskPackLength(loadCounter);
+    const buttonLoadMore = mainLayout.querySelector(`.load-more`);
 
-    if (taskPackLength(loadCounter) >= TASK_COUNT) {
-      lastElementIndex = loadCounter * TASK_PER_LOAD + TASK_COUNT % TASK_PER_LOAD;
-      buttonLoadMore.parentNode.removeChild(buttonLoadMore);
-    }
+    buttonLoadMore.addEventListener(`click`, (event) => {
+      event.preventDefault();
+      page++;
 
-    renderTasks(tasksContainer, makeTask, taskList.slice(firstElementIndex, lastElementIndex));
-  });
-}
+      const currentElement = page * TASKS_PER_PAGE;
+      renderTasks(currentElement);
+
+      if (currentElement + TASKS_PER_PAGE >= TASK_COUNT) {
+        buttonLoadMore.remove();
+      }
+    });
+  }
+};
+
+initPage();
